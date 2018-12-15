@@ -5,9 +5,20 @@
   <title>音声認識サンプル</title>
 </head>
 <body>
+
 <h2>音声認識サンプル</h2>
+<div>
+  <h3>state:</h3>
+  <div id="state_s">
+
+  </div>
+</div>
 <button id="btn">start</button>
-<div id="content"></div>
+<button id="btn-stop">stop</button>
+
+<div id="content">
+
+</div>
 
 <script>
     //ここに音声認識の処理を書いていく
@@ -16,27 +27,50 @@
     speech.lang = 'ja-JP';
 
     const btn = document.getElementById('btn');
+    const btn_stop = document.getElementById('btn-stop');
+
     const content = document.getElementById('content');
+    const state_s = document.getElementById('state_s');
+
+    var audio_continue_flag = false;
 
     btn.addEventListener('click' , function() {
         // 音声認識をスタート
         speech.start();
     });
+    btn_stop.addEventListener('click' , function() {
+      speech.stop();
+    });
 
     //---------------追記---------------//
+    speech.onstart = () => {
+      state_s.innerText = 'onstart'
+    }
+    speech.onspeechstart = () => {
+      state_s.innerText = 'onspeechstart'
+    }
+
     //音声自動文字起こし機能
     speech.onresult = function(e) {
+      state_s.innerText = 'onresult'
         speech.stop();
         if(e.results[0].isFinal){
-            var autotext =  e.results[0][0].transcript
-            console.log(e);
-            console.log(autotext);
+            var autotext =  e.results[0][0].transcript;
+
+            audio_continue_flag = true;
+
+            // console.log(e);
+            // console.log(autotext);
             content.innerHTML += '<div>'+ autotext +'</div>';
         }
     }
 
     speech.onend = () => {
-        speech.start()
+      state_s.innerText = 'onend'
+      if(audio_continue_flag){
+        speech.start();
+        audio_continue_flag = false;
+      }
     };
     //--------------------------------//
 
